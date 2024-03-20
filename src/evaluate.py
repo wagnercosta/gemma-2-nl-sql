@@ -4,8 +4,8 @@ from transformers import  AutoTokenizer, pipeline
 from datasets import load_dataset
 from tqdm import tqdm
 
-# peft_model_id = "./models/gemma-2b-sql-nl-it-v1"
-peft_model_id = "wagnercosta/gemma-2b-sql-nl-it-v1"
+peft_model_id = "./models/gemma-2b-sql-nl-it-v1"
+# peft_model_id = "wagnercosta/gemma-2b-sql-nl-it-v1"
 # tokenizer_id = "google/gemma-2b-it"
 
 
