@@ -2,12 +2,16 @@ import torch
 from peft import AutoPeftModelForCausalLM
 from transformers import  AutoTokenizer, pipeline
 from datasets import load_dataset
+from tqdm import tqdm
 
-peft_model_id = "./models/gemma-2b-sql-nl-it-v1"
+# peft_model_id = "./models/gemma-2b-sql-nl-it-v1"
+peft_model_id = "wagnercosta/gemma-2b-sql-nl-it-v1"
+# tokenizer_id = "google/gemma-2b-it"
+
 
 # Load Model with PEFT adapter
 tokenizer = AutoTokenizer.from_pretrained(peft_model_id)
-model = AutoPeftModelForCausalLM.from_pretrained(peft_model_id, device_map="auto", torch_dtype=torch.float16)
+model = AutoPeftModelForCausalLM.from_pretrained(peft_model_id, device_map="auto", torch_dtype=torch.float16, attn_implementation="flash_attention_2")
 eos_token = tokenizer("<end_of_turn>",add_special_tokens=False)["input_ids"][0]
 
 def formatting_func(context, question):
@@ -27,16 +31,26 @@ def test_inference(context, question):
     only_prompt = text.replace("<start_of_turn>", "").replace("<end_of_turn>", "")
     return result[len(only_prompt):].strip()
 
-eval_dataset = load_dataset("json", data_files="data/test_dataset.json", split="train")
-eval_dataset = eval_dataset.shuffle().select(range(10))
-
-
-for prompt in eval_dataset:
-    context = prompt["context"]
-    user = prompt["question"]
-    expected_result = prompt["answer"]
+def evaluate(sample):
+    context = sample["context"]
+    user = sample["question"]
+    expected_result = sample["answer"]
     inference = test_inference(context, user)
-    print(f"User: {user}")
-    print(f"e: {expected_result}")
-    print(f"i: {inference}")
-    print("-"*50)
+    
+    if inference == expected_result:
+        return 1
+    else:
+        return 0
+
+success_rate = []
+number_of_eval_samples = 20
+
+eval_dataset = load_dataset("json", data_files="data/test_dataset.json", split="train")
+# iterate over eval dataset and predict
+for s in tqdm(eval_dataset.shuffle().select(range(number_of_eval_samples))):
+    success_rate.append(evaluate(s))
+
+# compute accuracy
+accuracy = sum(success_rate)/len(success_rate)
+
+print(f"Accuracy: {accuracy*100:.2f}%")
