@@ -43,7 +43,7 @@ def evaluate(sample):
         return 0
 
 success_rate = []
-number_of_eval_samples = 20
+number_of_eval_samples = 1000
 
 eval_dataset = load_dataset("json", data_files="data/test_dataset.json", split="train")
 # iterate over eval dataset and predict
