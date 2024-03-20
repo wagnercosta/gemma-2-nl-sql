@@ -21,8 +21,8 @@ login(
 )
 
 # Load dataset from the hub
-dataset = load_dataset("b-mc2/sql-create-context", split="train")
-dataset = dataset.shuffle().select(range(5000))
+# dataset = load_dataset("b-mc2/sql-create-context", split="train")
+# dataset = dataset.shuffle().select(range(5000))
 
 def formatting_func(example):
     output_texts = []
@@ -32,11 +32,7 @@ def formatting_func(example):
     return output_texts
 
 # Load jsonl data from disk
-# dataset = load_dataset("json", data_files="data/train_dataset.json", split="train")
-# dataset = dataset.shuffle().select(range(5000))
-
-# split dataset into 10,000 training samples and 2,500 test samples
-# dataset = dataset.train_test_split(test_size=2500/12500)
+dataset = load_dataset("json", data_files="data/train_dataset.json", split="train")
 
 # Hugging Face model id
 model_id = "google/gemma-2b-it"
@@ -71,7 +67,7 @@ peft_config = LoraConfig(
 
 args = TrainingArguments(
     output_dir="models/gemma-2b-sql-nl-it-v1", # directory to save and repository id
-    num_train_epochs=3,                     # number of training epochs
+    num_train_epochs=5,                     # number of training epochs
     per_device_train_batch_size=2,          # batch size per device during training
     gradient_accumulation_steps=2,          # number of steps before performing a backward/update pass
     gradient_checkpointing=True,            # use gradient checkpointing to save memory
